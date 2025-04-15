@@ -8,4 +8,5 @@ type Backend struct {
 	Protocol     string
 	Weight       int
 	InitialState bool
+	PoolID       string
 }

@@ -9,5 +9,6 @@ import (
 func NewHttpRouter() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/test", handler.TestHandler)
+	mux.HandleFunc("/backends/add", handler.TestHandler)
 	return mux
 }
