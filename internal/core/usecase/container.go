@@ -3,16 +3,16 @@ package usecase
 import "github.com/FelipeSoft/traffik-one/internal/adapter/repository"
 
 type Container struct {
-	TestUseCase *TestUseCase
-	// new usecases could be placed here...
+	TestUseCase    *TestUseCase
+	BackendUseCase *BackendUseCase
 }
 
 func NewContainer() *Container {
-	// injecting the repository adapter
 	testRepository := repository.NewMemoryTestRepository()
+	backendRepository := repository.NewMemoryBackendRepository()
 
 	return &Container{
-		TestUseCase: NewTestUseCase(testRepository), // create the usecase injecting the repository
-		// new usecases could be placed here...
+		TestUseCase:    NewTestUseCase(testRepository),
+		BackendUseCase: NewBackendUseCase(backendRepository),
 	}
 }
