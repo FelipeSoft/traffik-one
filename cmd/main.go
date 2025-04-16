@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
+	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
 	"github.com/FelipeSoft/traffik-one/internal/port/http"
 	"github.com/joho/godotenv"
 )
@@ -19,6 +20,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not load the environment variables file (.env) caused by error: %v", err)
 	}
+
+	bolt.Init(os.Getenv("BOLTDB_PATH"), os.Getenv("BOLTDB_DATABASE"))
+	defer bolt.Close()
 
 	appInstance := app.NewApp()
 	http.StartHttpServer(ctx, appInstance)
