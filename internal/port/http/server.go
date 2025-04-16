@@ -8,13 +8,12 @@ import (
 	"os"
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
-	"github.com/FelipeSoft/traffik-one/internal/port/http/router"
 )
 
 func StartHttpServer(ctx context.Context, app *app.App) {
 	httpHost := os.Getenv("HOST")
 	httpPort := os.Getenv("PORT")
-	httpRouter := router.NewHttpRouter(app)
+	httpRouter := RegisterRoutes(app)
 	httpBindAddress := fmt.Sprintf("%s:%s", httpHost, httpPort)
 
 	server := &http.Server{
@@ -35,4 +34,3 @@ func StartHttpServer(ctx context.Context, app *app.App) {
 		log.Fatalf("HTTP server shutdown failed: %v", err)
 	}
 }
-
