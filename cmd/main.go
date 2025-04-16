@@ -6,7 +6,8 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/FelipeSoft/traffik-one/internal/ports/http"
+	"github.com/FelipeSoft/traffik-one/internal/app"
+	"github.com/FelipeSoft/traffik-one/internal/port/http"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +20,8 @@ func main() {
 		log.Fatalf("Could not load the environment variables file (.env) caused by error: %v", err)
 	}
 
-	go http.StartHttpServer()
+	appInstance := app.NewApp()
+	http.StartHttpServer(ctx, appInstance)
 
 	<-ctx.Done()
 	log.Print("Load balancer exited")
