@@ -21,7 +21,9 @@ func main() {
 		log.Fatalf("Could not load the environment variables file (.env) caused by error: %v", err)
 	}
 
-	bolt.Init(os.Getenv("BOLTDB_PATH"), os.Getenv("BOLTDB_DATABASE"))
+	if err := bolt.Init(os.Getenv("BOLTDB_PATH"), os.Getenv("BOLTDB_DATABASE")); err != nil {
+		log.Fatalf("Failed to initialize BoltDB: %v", err)
+	}
 	defer bolt.Close()
 
 	appInstance := app.NewApp()

@@ -3,6 +3,7 @@ package bolt
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/boltdb/bolt"
@@ -11,34 +12,60 @@ import (
 var (
 	dbInstance *bolt.DB
 	once       sync.Once
+	initError  error
 )
 
-func Init(path string, database string) {
+func Init(path string, database string) error {
 	once.Do(func() {
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			err := os.Mkdir(path, 0666)
-			if err != nil {
-				log.Fatalf("Could not create the database folder: %v", err)
-			}
+		if err := os.MkdirAll(path, 0755); err != nil {
+			initError = err
+			return
 		}
 
-		conn, err := bolt.Open(path + database, 0666, nil)
+		dbPath := filepath.Join(path, database)
+		conn, err := bolt.Open(dbPath, 0600, nil)
 		if err != nil {
-			log.Fatalf("Error to open BoltDB connection: %v", err)
+			initError = err
+			return
 		}
+
+		bucketNames := []string{"backends", "pools", "rules"}
+		if err := startBuckets(conn, bucketNames); err != nil {
+			conn.Close()
+			initError = err
+			return
+		}
+
 		dbInstance = conn
+	})
+
+	return initError
+}
+
+func startBuckets(db *bolt.DB, bucketNames []string) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		for _, name := range bucketNames {
+			if _, err := tx.CreateBucketIfNotExists([]byte(name)); err != nil {
+				return err
+			}
+			log.Printf("[BoltDB] Bucket '%s' initilized with success", name)
+		}
+		return nil
 	})
 }
 
 func DB() *bolt.DB {
 	if dbInstance == nil {
-		log.Fatal("BoltDB was not initialized. Call bolt.Init() first.")
+		log.Fatal("[BoltDB] A instance was not initialized. Call bolt.Init() first.")
 	}
 	return dbInstance
 }
 
 func Close() {
 	if dbInstance != nil {
-		_ = dbInstance.Close()
+		if err := dbInstance.Close(); err != nil {
+			log.Printf("[BoltDB] Error on close connection with BoltDB: %v", err)
+		}
+		dbInstance = nil
 	}
 }
