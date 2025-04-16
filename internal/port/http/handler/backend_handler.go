@@ -37,7 +37,7 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 
 		h.uc.AddBackend(ctx)
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
 		w.Write([]byte("Backend Added succesfully!"))
 	}
 }
