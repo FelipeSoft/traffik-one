@@ -8,15 +8,24 @@ import (
 func RegisterRoutes(app *app.App) *port.Router {
 	router := port.NewRouter()
 
-	router.Handle("POST", "/test", app.Middlewares.AuthenticationMiddleware.HandleAuth(app.Handlers.TestHandler.Test()))
-	router.Handle("POST", "/backends/add", app.Middlewares.AuthenticationMiddleware.HandleAuth(app.Handlers.BackendHandler.AddBackend()))
-	router.Handle("GET", "/backends", app.Middlewares.AuthenticationMiddleware.HandleAuth(app.Handlers.BackendHandler.GetAllBackends()))
-	router.Handle("POST", "/backends/{backendId}/remove/pool", app.Handlers.BackendHandler.RemoveBackendFromPool())
-	router.Handle("POST", "/backends/update/{backendId}", app.Handlers.BackendHandler.UpdateBackend())
-	router.Handle("POST", "/backends/{backendId}/activate", app.Handlers.BackendHandler.ActivateBackend())
-	router.Handle("POST", "/backends/{backendId}/inactivate", app.Handlers.BackendHandler.InactivateBackend())
-	router.Handle("DELETE", "/backends/delete/{backendId}", app.Handlers.BackendHandler.DeleteBackend())
-	router.Handle("GET", "/backends/{backendId}/find", app.Handlers.BackendHandler.GetBackendByID())
+	withBearerToken := app.Middlewares.AuthenticationMiddleware.HandleBearerToken
+
+	router.Handle("POST", "/test",
+		withBearerToken(app.Handlers.TestHandler.Test()))
+	router.Handle("POST", "/backends/add",
+		withBearerToken(app.Handlers.BackendHandler.AddBackend()))
+	router.Handle("GET", "/backends",
+		withBearerToken(app.Handlers.BackendHandler.GetAllBackends()))
+	router.Handle("PUT", "/backends/{backendId}/update",
+		withBearerToken(app.Handlers.BackendHandler.UpdateBackend()))
+	router.Handle("PATCH", "/backends/{backendId}/activate",
+		withBearerToken(app.Handlers.BackendHandler.ActivateBackend()))
+	router.Handle("PATCH", "/backends/{backendId}/inactivate",
+		withBearerToken(app.Handlers.BackendHandler.InactivateBackend()))
+	router.Handle("DELETE", "/backends/{backendId}/delete",
+		withBearerToken(app.Handlers.BackendHandler.DeleteBackend()))
+	router.Handle("GET", "/backends/{backendId}/find",
+		withBearerToken(app.Handlers.BackendHandler.GetBackendByID()))
 
 	return router
 }

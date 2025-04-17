@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -18,7 +17,7 @@ func NewAuthenticationMiddleware(tokenManager entity.TokenManager) *Authenticati
 	}
 }
 
-func (m *AuthenticationMiddleware) HandleAuth(next http.HandlerFunc) http.HandlerFunc {
+func (m *AuthenticationMiddleware) HandleBearerToken(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -40,7 +39,6 @@ func (m *AuthenticationMiddleware) HandleAuth(next http.HandlerFunc) http.Handle
 		if !ok || err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte("Unauthorized: invalid bearer token"))
-			log.Print(token)
 			return
 		}
 

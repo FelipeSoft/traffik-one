@@ -56,24 +56,24 @@ func matchPath(pattern, path string) (map[string]string, bool) {
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-    for _, route := range r.routes {
-        if req.Method != route.Method {
-            continue
-        }
+	for _, route := range r.routes {
+		if req.Method != route.Method {
+			continue
+		}
 
-        params, ok := matchPath(route.Pattern, req.URL.Path)
-        if ok {
-            for key, value := range params {
-                if value == "" {
-                    http.Error(w, fmt.Sprintf("Parâmetro '%s' inválido", key), http.StatusBadRequest)
-                    return
-                }
-            }
-            
-            ctx := context.WithValue(req.Context(), ParamsKey, params)
-            route.Handler.ServeHTTP(w, req.WithContext(ctx))
-            return
-        }
-    }
-    http.NotFound(w, req)
+		params, ok := matchPath(route.Pattern, req.URL.Path)
+		if ok {
+			for key, value := range params {
+				if value == "" {
+					http.Error(w, fmt.Sprintf("Invalid '%s' param", key), http.StatusBadRequest)
+					return
+				}
+			}
+
+			ctx := context.WithValue(req.Context(), ParamsKey, params)
+			route.Handler.ServeHTTP(w, req.WithContext(ctx))
+			return
+		}
+	}
+	http.NotFound(w, req)
 }
