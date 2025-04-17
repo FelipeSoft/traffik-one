@@ -65,15 +65,18 @@ func (r *BoltBackendRepository) GetAll(ctx context.Context) ([]entity.Backend, e
 }
 
 func (r *BoltBackendRepository) GetByID(ctx context.Context, backendId string) (*entity.Backend, error) {
-	var result *entity.Backend
-	r.db.View(func(tx *bolt.Tx) error {
+	var result entity.Backend
+	err := r.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(backendBoltBucket)
 		if bucket == nil {
 			return fmt.Errorf("bolt bucket named as '%s' not found", string(backendBoltBucket))
 		}
 		value := bucket.Get([]byte(backendId))
+		if len(value) == 0 {
+			return fmt.Errorf("could not find the backend with id '%s'", backendId)
+		}
 		err := json.Unmarshal(value, &result)
 		return err
 	})
-	return result, nil
+	return &result, err
 }

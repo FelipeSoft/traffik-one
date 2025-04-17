@@ -19,29 +19,15 @@ func NewBackendUseCase(repo port.BackendRepository) *BackendUseCase {
 }
 
 func (uc *BackendUseCase) AddBackend(ctx context.Context, input dto.AddBackendInput) error {
-	backend := &entity.Backend{
-		IPv4:     input.IPv4,
-		Hostname: input.Hostname,
-		Port:     input.Port,
-		Protocol: input.Protocol,
-		Weight:   input.Weight,
-		PoolID:   &input.PoolID,
-	}
-	backend.Activate()
+	backend := entity.NewBackend(
+		input.IPv4,
+		input.Hostname,
+		input.Port,
+		input.Protocol,
+		input.Weight,
+		input.PoolID,
+	)
 	uc.repo.Save(ctx, backend)
-	return nil
-}
-
-func (uc *BackendUseCase) RemoveBackendFromPool(ctx context.Context, input dto.RemoveBackendFromPoolInput) error {
-	backend, err := uc.repo.GetByID(ctx, input.ID)
-	if err != nil {
-		return err
-	}
-	backend.RemoveFromPool()
-	err = uc.repo.Save(ctx, backend)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -53,7 +39,7 @@ func (uc *BackendUseCase) UpdateBackend(ctx context.Context, input dto.UpdateBac
 
 	backend.Hostname = input.Hostname
 	backend.IPv4 = input.IPv4
-	backend.PoolID = &input.PoolID
+	backend.PoolID = input.PoolID
 	backend.Port = input.Port
 	backend.Protocol = input.Protocol
 	backend.Weight = input.Weight
@@ -70,9 +56,10 @@ func (uc *BackendUseCase) ActivateBackend(ctx context.Context, input dto.Activat
 	if err != nil {
 		return err
 	}
-	backend.Activate()
-	err = uc.repo.Save(ctx, backend)
-	if err != nil {
+	if err = backend.Activate(); err != nil {
+		return err
+	}
+	if err = uc.repo.Save(ctx, backend); err != nil {
 		return err
 	}
 	return nil
@@ -83,15 +70,16 @@ func (uc *BackendUseCase) InactivateBackend(ctx context.Context, input dto.Inact
 	if err != nil {
 		return err
 	}
-	backend.Inactivate()
-	err = uc.repo.Save(ctx, backend)
-	if err != nil {
+	if err = backend.Inactivate(); err != nil {
+		return err
+	}
+	if err = uc.repo.Save(ctx, backend); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (uc *BackendUseCase) DeleteBackend(ctx context.Context, input dto.InactivateBackendInput) error {
+func (uc *BackendUseCase) DeleteBackend(ctx context.Context, input dto.DeleteBackendInput) error {
 	err := uc.repo.Delete(ctx, input.ID)
 	if err != nil {
 		return err

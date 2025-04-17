@@ -9,10 +9,13 @@ import (
 	"github.com/FelipeSoft/traffik-one/internal/app"
 	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
 	"github.com/FelipeSoft/traffik-one/internal/port/http"
+	"github.com/FelipeSoft/traffik-one/internal/port/idgen"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	idgen.InitNode(1)
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Kill, os.Interrupt)
 	defer stop()
 
