@@ -26,13 +26,13 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 		ctx := r.Context()
 
 		body, err := io.ReadAll(r.Body)
-		defer r.Body.Close()
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
+		defer r.Body.Close()
 
 		var dto dto.AddBackendInput
 		err = json.Unmarshal(body, &dto)
@@ -56,14 +56,27 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		body, err := io.ReadAll(r.Body)
-		defer r.Body.Close()
+		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid context params"))
+			return
+		}
 
+		backendId := params["backendId"]
+		if backendId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("The URL param 'backendId' missing"))
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
+		defer r.Body.Close()
 
 		var dto dto.UpdateBackendInput
 		err = json.Unmarshal(body, &dto)
@@ -72,6 +85,8 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
+
+		dto.ID = backendId
 
 		err = h.uc.UpdateBackend(ctx, dto)
 		if err != nil {
