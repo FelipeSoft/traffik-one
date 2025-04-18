@@ -6,8 +6,9 @@ import (
 )
 
 type Container struct {
-	TestUseCase    *TestUseCase
-	BackendUseCase *BackendUseCase
+	TestUseCase         *TestUseCase
+	BackendUseCase      *BackendUseCase
+	RoutingRulesUseCase *RoutingRulesUseCase
 }
 
 func NewContainer() *Container {
@@ -15,9 +16,11 @@ func NewContainer() *Container {
 
 	testRepository := repository.NewMemoryTestRepository()
 	backendRepository := repository.NewBoltBackendRepository(boltDb)
+	routingRulesRepository := repository.NewBoltRoutingRulesRepository(boltDb)
 
 	return &Container{
-		TestUseCase:    NewTestUseCase(testRepository),
-		BackendUseCase: NewBackendUseCase(backendRepository),
+		TestUseCase:         NewTestUseCase(testRepository),
+		BackendUseCase:      NewBackendUseCase(backendRepository),
+		RoutingRulesUseCase: NewRoutingRulesUseCase(routingRulesRepository),
 	}
 }

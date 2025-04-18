@@ -29,7 +29,7 @@ func Init(path string, database string) error {
 			return
 		}
 
-		bucketNames := []string{"backends", "pools", "rules"}
+		bucketNames := []string{"backends", "pools", "routing_rules"}
 		if err := startBuckets(conn, bucketNames); err != nil {
 			conn.Close()
 			initError = err
