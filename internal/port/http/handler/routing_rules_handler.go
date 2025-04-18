@@ -115,7 +115,7 @@ func (h *RoutingRulesHandler) GetRoutingRulesByID() http.HandlerFunc {
 			return
 		}
 
-		backends, err := h.uc.GetRoutingRulesByID(ctx, dto.GetRoutingRulesByIDInput{
+		backends, err := h.uc.GetRoutingRulesById(ctx, dto.GetRoutingRulesByIDInput{
 			ID: routingRulesId,
 		})
 

@@ -59,7 +59,7 @@ func (uc *RoutingRulesUseCase) GetAllRoutingRules(ctx context.Context) ([]entity
 	return routingRules, nil
 }
 
-func (uc *RoutingRulesUseCase) GetRoutingRulesByID(ctx context.Context, input dto.GetRoutingRulesByIDInput) (*entity.RoutingRules, error) {
+func (uc *RoutingRulesUseCase) GetRoutingRulesById(ctx context.Context, input dto.GetRoutingRulesByIDInput) (*entity.RoutingRules, error) {
 	routingRules, err := uc.repo.GetByID(ctx, input.ID)
 	if err != nil {
 		return routingRules, err
