@@ -12,6 +12,7 @@ func RegisterRoutes(app *app.App) *port.Router {
 
 	router.Handle("POST", "/test",
 		withBearerToken(app.Handlers.TestHandler.Test()))
+
 	router.Handle("POST", "/backends/add",
 		withBearerToken(app.Handlers.BackendHandler.AddBackend()))
 	router.Handle("GET", "/backends",
@@ -26,6 +27,17 @@ func RegisterRoutes(app *app.App) *port.Router {
 		withBearerToken(app.Handlers.BackendHandler.DeleteBackend()))
 	router.Handle("GET", "/backends/{backendId}/find",
 		withBearerToken(app.Handlers.BackendHandler.GetBackendByID()))
+
+	router.Handle("POST", "/routing/rules/add",
+		withBearerToken(app.Handlers.RoutingRulesHandler.AddRoutingRules()))
+	router.Handle("PUT", "/routing/rules/{routingRulesId}/update",
+		withBearerToken(app.Handlers.RoutingRulesHandler.UpdateRoutingRules()))
+	router.Handle("GET", "/routing/rules/{routingRulesId}/find",
+		withBearerToken(app.Handlers.RoutingRulesHandler.GetRoutingRulesByID()))
+	router.Handle("GET", "/routing/rules",
+		withBearerToken(app.Handlers.RoutingRulesHandler.GetAllRoutingRules()))
+	router.Handle("DELETE", "/routing/rules/{routingRulesId}/delete",
+		withBearerToken(app.Handlers.RoutingRulesHandler.DeleteRoutingRules()))
 
 	return router
 }

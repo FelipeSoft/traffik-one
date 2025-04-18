@@ -11,17 +11,17 @@ import (
 	"github.com/FelipeSoft/traffik-one/internal/core/usecase"
 )
 
-type BackendHandler struct {
-	uc *usecase.BackendUseCase
+type RoutingRulesHandler struct {
+	uc *usecase.RoutingRulesUseCase
 }
 
-func NewBackendHandler(uc *usecase.BackendUseCase) *BackendHandler {
-	return &BackendHandler{
+func NewRoutingRulesHandler(uc *usecase.RoutingRulesUseCase) *RoutingRulesHandler {
+	return &RoutingRulesHandler{
 		uc: uc,
 	}
 }
 
-func (h *BackendHandler) AddBackend() http.HandlerFunc {
+func (h *RoutingRulesHandler) AddRoutingRules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -34,7 +34,7 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 			return
 		}
 
-		var dto dto.AddBackendInput
+		var dto dto.AddRoutingRulesInput
 		err = json.Unmarshal(body, &dto)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -42,7 +42,7 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 			return
 		}
 
-		err = h.uc.AddBackend(ctx, dto)
+		err = h.uc.Add(ctx, dto)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
@@ -52,7 +52,7 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 	}
 }
 
-func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
+func (h *RoutingRulesHandler) UpdateRoutingRules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -65,7 +65,7 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			return
 		}
 
-		var dto dto.UpdateBackendInput
+		var dto dto.UpdateRoutingRulesInput
 		err = json.Unmarshal(body, &dto)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -73,53 +73,7 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			return
 		}
 
-		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
-		if !ok {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid context params"))
-			return
-		}
-
-		backendId := params["backendId"]
-		if backendId == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("The URL param 'backendId' missing"))
-			return
-		}
-
-		dto.ID = backendId
-
-		err = h.uc.UpdateBackend(ctx, dto)
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-	}
-}
-
-func (h *BackendHandler) ActivateBackend() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
-		if !ok {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid context params"))
-			return
-		}
-
-		backendId := params["backendId"]
-		if backendId == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("The URL param 'backendId' missing"))
-			return
-		}
-
-		err := h.uc.ActivateBackend(ctx, dto.ActivateBackendInput{
-			ID: backendId,
-		})
+		err = h.uc.Update(ctx, dto)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
@@ -129,7 +83,7 @@ func (h *BackendHandler) ActivateBackend() http.HandlerFunc {
 	}
 }
 
-func (h *BackendHandler) InactivateBackend() http.HandlerFunc {
+func (h *RoutingRulesHandler) GetRoutingRulesByID() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -147,54 +101,10 @@ func (h *BackendHandler) InactivateBackend() http.HandlerFunc {
 			return
 		}
 
-		err := h.uc.InactivateBackend(ctx, dto.InactivateBackendInput{
+		backends, err := h.uc.GetRoutingRulesByID(ctx, dto.GetRoutingRulesByIDInput{
 			ID: backendId,
 		})
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		w.WriteHeader(http.StatusCreated)
-	}
-}
 
-func (h *BackendHandler) DeleteBackend() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
-		if !ok {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Invalid context params"))
-			return
-		}
-
-		backendId := params["backendId"]
-		if backendId == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("The URL param 'backendId' missing"))
-			return
-		}
-
-		err := h.uc.DeleteBackend(ctx, dto.DeleteBackendInput{
-			ID: backendId,
-		})
-		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-	}
-}
-
-func (h *BackendHandler) GetAllBackends() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		backends, err := h.uc.GetAllBackends(ctx)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
@@ -213,7 +123,30 @@ func (h *BackendHandler) GetAllBackends() http.HandlerFunc {
 	}
 }
 
-func (h *BackendHandler) GetBackendByID() http.HandlerFunc {
+func (h *RoutingRulesHandler) GetAllRoutingRules() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		backends, err := h.uc.GetAllRoutingRules(ctx)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		resp, err := json.Marshal(backends)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
+}
+
+func (h *RoutingRulesHandler) DeleteRoutingRules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -231,24 +164,15 @@ func (h *BackendHandler) GetBackendByID() http.HandlerFunc {
 			return
 		}
 
-		backends, err := h.uc.GetBackendByID(ctx, dto.GetBackendByIDInput{
+		err := h.uc.Delete(ctx, dto.DeleteRoutingRulesInput{
 			ID: backendId,
 		})
-
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-		resp, err := json.Marshal(backends)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(resp)
 	}
 }
