@@ -26,13 +26,12 @@ func (h *RoutingRulesHandler) AddRoutingRules() http.HandlerFunc {
 		ctx := r.Context()
 
 		body, err := io.ReadAll(r.Body)
-		defer r.Body.Close()
-
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
+		defer r.Body.Close()
 
 		var dto dto.AddRoutingRulesInput
 		err = json.Unmarshal(body, &dto)
@@ -56,15 +55,28 @@ func (h *RoutingRulesHandler) UpdateRoutingRules() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		body, err := io.ReadAll(r.Body)
-		defer r.Body.Close()
+		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid context params"))
+			return
+		}
 
+		routingRulesId := params["routingRulesId"]
+		if routingRulesId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("The URL param 'backendId' missing"))
+			return
+		}
+
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
-
+		defer r.Body.Close()
+		
 		var dto dto.UpdateRoutingRulesInput
 		err = json.Unmarshal(body, &dto)
 		if err != nil {
@@ -72,6 +84,8 @@ func (h *RoutingRulesHandler) UpdateRoutingRules() http.HandlerFunc {
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
+
+		dto.ID = routingRulesId
 
 		err = h.uc.Update(ctx, dto)
 		if err != nil {
@@ -94,15 +108,15 @@ func (h *RoutingRulesHandler) GetRoutingRulesByID() http.HandlerFunc {
 			return
 		}
 
-		backendId := params["backendId"]
-		if backendId == "" {
+		routingRulesId := params["routingRulesId"]
+		if routingRulesId == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("The URL param 'backendId' missing"))
+			w.Write([]byte("The URL param 'routingRulesId' missing"))
 			return
 		}
 
 		backends, err := h.uc.GetRoutingRulesByID(ctx, dto.GetRoutingRulesByIDInput{
-			ID: backendId,
+			ID: routingRulesId,
 		})
 
 		if err != nil {
@@ -157,15 +171,15 @@ func (h *RoutingRulesHandler) DeleteRoutingRules() http.HandlerFunc {
 			return
 		}
 
-		backendId := params["backendId"]
-		if backendId == "" {
+		routingRulesId := params["routingRulesId"]
+		if routingRulesId == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("The URL param 'backendId' missing"))
+			w.Write([]byte("The URL param 'routingRulesId' missing"))
 			return
 		}
 
 		err := h.uc.Delete(ctx, dto.DeleteRoutingRulesInput{
-			ID: backendId,
+			ID: routingRulesId,
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
