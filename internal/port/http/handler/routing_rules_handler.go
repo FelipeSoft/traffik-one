@@ -93,7 +93,7 @@ func (h *RoutingRulesHandler) UpdateRoutingRules() http.HandlerFunc {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
