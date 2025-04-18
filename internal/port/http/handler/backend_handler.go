@@ -25,13 +25,9 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		if r.Method != http.MethodPost {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			w.Write([]byte("Method not allowed"))
-			return
-		}
-
 		body, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
@@ -61,6 +57,8 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 		ctx := r.Context()
 
 		body, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
