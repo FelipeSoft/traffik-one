@@ -94,7 +94,7 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
