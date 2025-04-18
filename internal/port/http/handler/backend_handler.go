@@ -75,13 +75,29 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			return
 		}
 
+		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid context params"))
+			return
+		}
+
+		backendId := params["backendId"]
+		if backendId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("The URL param 'backendId' missing"))
+			return
+		}
+
+		dto.ID = backendId
+
 		err = h.uc.UpdateBackend(ctx, dto)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

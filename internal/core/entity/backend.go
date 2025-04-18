@@ -14,7 +14,7 @@ type Backend struct {
 	Protocol string  `json:"protocol"`
 	Weight   *int    `json:"weight"`
 	State    bool    `json:"state"`
-	PoolID   string `json:"poolId"`
+	PoolID   string  `json:"poolId"`
 }
 
 func NewBackend(ipv4 string, hostname *string, port int, protocol string, weight *int, poolId string) *Backend {
