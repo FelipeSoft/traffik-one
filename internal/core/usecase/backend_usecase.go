@@ -2,23 +2,31 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/dto"
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 	"github.com/FelipeSoft/traffik-one/internal/core/port"
+	"github.com/FelipeSoft/traffik-one/internal/port/dispatcher"
 )
 
 type BackendUseCase struct {
-	repo port.BackendRepository
+	repo       port.BackendRepository
+	dispatcher *dispatcher.BackendDispatcher
 }
 
-func NewBackendUseCase(repo port.BackendRepository) *BackendUseCase {
+func NewBackendUseCase(repo port.BackendRepository, dispatcher *dispatcher.BackendDispatcher) *BackendUseCase {
 	return &BackendUseCase{
-		repo: repo,
+		repo:       repo,
+		dispatcher: dispatcher,
 	}
 }
 
 func (uc *BackendUseCase) AddBackend(ctx context.Context, input dto.AddBackendInput) error {
+	if input.PoolID != "1" {
+		return fmt.Errorf("only the default poolId 1 should be used")
+	}
+
 	backend := entity.NewBackend(
 		input.IPv4,
 		input.Hostname,
@@ -27,7 +35,18 @@ func (uc *BackendUseCase) AddBackend(ctx context.Context, input dto.AddBackendIn
 		input.Weight,
 		input.PoolID,
 	)
-	uc.repo.Save(ctx, backend)
+
+	err := uc.repo.Save(ctx, backend)
+	if err != nil {
+		return err
+	}
+
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, input.PoolID)
+	if err != nil {
+		return err
+	}
+
+	uc.dispatcher.Dispatch(backends)
 	return nil
 }
 
@@ -37,17 +56,44 @@ func (uc *BackendUseCase) UpdateBackend(ctx context.Context, input dto.UpdateBac
 		return err
 	}
 
-	backend.Hostname = input.Hostname
-	backend.IPv4 = input.IPv4
-	backend.PoolID = input.PoolID
-	backend.Port = input.Port
-	backend.Protocol = input.Protocol
-	backend.Weight = input.Weight
+	if input.Hostname != "" {
+		backend.Hostname = input.Hostname
+	}
+
+	if input.IPv4 != "" {
+		backend.IPv4 = input.IPv4
+	}
+
+	if input.PoolID != "" {
+		if input.PoolID != "1" {
+			return fmt.Errorf("only the default poolId 1 should be used")
+		}
+		backend.PoolID = input.PoolID
+	}
+
+	if input.Port != 0 {
+		backend.Port = input.Port
+	}
+
+	if input.Protocol != "" {
+		backend.Protocol = input.Protocol
+	}
+
+	if input.Weight != 0 {
+		backend.Weight = input.Weight
+	}
 
 	err = uc.repo.Save(ctx, backend)
 	if err != nil {
 		return err
 	}
+
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID)
+	if err != nil {
+		return err
+	}
+
+	uc.dispatcher.Dispatch(backends)
 	return nil
 }
 
@@ -62,6 +108,12 @@ func (uc *BackendUseCase) ActivateBackend(ctx context.Context, input dto.Activat
 	if err = uc.repo.Save(ctx, backend); err != nil {
 		return err
 	}
+
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID)
+	if err != nil {
+		return err
+	}
+	uc.dispatcher.Dispatch(backends)
 	return nil
 }
 
@@ -76,14 +128,28 @@ func (uc *BackendUseCase) InactivateBackend(ctx context.Context, input dto.Inact
 	if err = uc.repo.Save(ctx, backend); err != nil {
 		return err
 	}
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID)
+	if err != nil {
+		return err
+	}
+	uc.dispatcher.Dispatch(backends)
 	return nil
 }
 
 func (uc *BackendUseCase) DeleteBackend(ctx context.Context, input dto.DeleteBackendInput) error {
-	err := uc.repo.Delete(ctx, input.ID)
+	backend, err := uc.repo.GetByID(ctx, input.ID)
 	if err != nil {
 		return err
 	}
+	err = uc.repo.Delete(ctx, input.ID, backend.PoolID)
+	if err != nil {
+		return err
+	}
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID)
+	if err != nil {
+		return err
+	}
+	uc.dispatcher.Dispatch(backends)
 	return nil
 }
 
@@ -101,4 +167,12 @@ func (uc *BackendUseCase) GetBackendByID(ctx context.Context, input dto.GetBacke
 		return backend, err
 	}
 	return backend, nil
+}
+
+func (uc *BackendUseCase) GetBackendsByPoolID(ctx context.Context, input dto.GetBackendsByPoolIDInput) ([]entity.Backend, error) {
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, input.PoolID)
+	if err != nil {
+		return backends, err
+	}
+	return backends, nil
 }

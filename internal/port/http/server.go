@@ -11,8 +11,8 @@ import (
 )
 
 func StartHttpServer(ctx context.Context, app *app.App) {
-	httpHost := os.Getenv("HOST")
-	httpPort := os.Getenv("PORT")
+	httpHost := os.Getenv("HTTP_HOST")
+	httpPort := os.Getenv("HTTP_PORT")
 	httpRouter := RegisterRoutes(app)
 	httpBindAddress := fmt.Sprintf("%s:%s", httpHost, httpPort)
 
@@ -22,15 +22,15 @@ func StartHttpServer(ctx context.Context, app *app.App) {
 	}
 
 	go func() {
-		log.Printf("HTTP server listening on %s", httpHost)
+		log.Printf("[HTTP Server] Listening on %s", httpBindAddress)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Could not start the HTTP server on %s caused by error: %v", httpBindAddress, err)
 		}
 	}()
 
 	<-ctx.Done()
-	log.Println("Shutting down HTTP server...")
+	log.Print("[HTTP Server] Shutting down...")
 	if err := server.Shutdown(context.Background()); err != nil {
-		log.Fatalf("HTTP server shutdown failed: %v", err)
+		log.Fatalf("[HTTP Server] Shutdown failed: %v", err)
 	}
 }

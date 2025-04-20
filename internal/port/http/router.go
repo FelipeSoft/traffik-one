@@ -27,6 +27,8 @@ func RegisterRoutes(app *app.App) *port.Router {
 		withBearerToken(app.Handlers.BackendHandler.DeleteBackend()))
 	router.Handle("GET", "/backends/{backendId}/find",
 		withBearerToken(app.Handlers.BackendHandler.GetBackendByID()))
+	router.Handle("GET", "/backends/pool/{poolId}/find",
+		withBearerToken(app.Handlers.BackendHandler.GetBackendByPoolID()))
 
 	router.Handle("POST", "/routing/rules/add",
 		withBearerToken(app.Handlers.RoutingRulesHandler.AddRoutingRules()))
@@ -38,6 +40,13 @@ func RegisterRoutes(app *app.App) *port.Router {
 		withBearerToken(app.Handlers.RoutingRulesHandler.GetAllRoutingRules()))
 	router.Handle("DELETE", "/routing/rules/{routingRulesId}/delete",
 		withBearerToken(app.Handlers.RoutingRulesHandler.DeleteRoutingRules()))
+	router.Handle("GET", "/routing/rules/pool/{poolId}/find",
+		withBearerToken(app.Handlers.RoutingRulesHandler.GetRoutingRulesByPoolID()))
+
+	router.Handle("GET", "/algorithm/get",
+		withBearerToken(app.Handlers.AlgorithmsHandler.GetAlgorithm()))
+	router.Handle("PUT", "/algorithm/set",
+		withBearerToken(app.Handlers.AlgorithmsHandler.SetAlgorithm()))
 
 	return router
 }

@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/FelipeSoft/traffik-one/internal/core/entity"
+	"github.com/FelipeSoft/traffik-one/internal/core/port"
 )
 
 type AuthenticationMiddleware struct {
-	tokenManager entity.TokenManager
+	tokenManager port.TokenManager
 }
 
-func NewAuthenticationMiddleware(tokenManager entity.TokenManager) *AuthenticationMiddleware {
+func NewAuthenticationMiddleware(tokenManager port.TokenManager) *AuthenticationMiddleware {
 	return &AuthenticationMiddleware{
 		tokenManager: tokenManager,
 	}
