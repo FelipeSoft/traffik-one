@@ -6,19 +6,16 @@ import (
 	"sync"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
-	"github.com/FelipeSoft/traffik-one/internal/core/port"
 )
 
 type WeightedRoundRobinAlgorithm struct {
-	repo     port.BackendRepository
 	backends []entity.Backend
 	index    uint32
 	mu       sync.RWMutex
 }
 
-func NewWeightedRoundRobinAlgorithm(repo port.BackendRepository) *WeightedRoundRobinAlgorithm {
+func NewWeightedRoundRobinAlgorithm() *WeightedRoundRobinAlgorithm {
 	return &WeightedRoundRobinAlgorithm{
-		repo:  repo,
 		index: 0,
 	}
 }

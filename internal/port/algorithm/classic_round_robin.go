@@ -7,19 +7,16 @@ import (
 	"sync/atomic"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
-	"github.com/FelipeSoft/traffik-one/internal/core/port"
 )
 
 type ClassicRoundRobinAlgorithm struct {
-	repo     port.BackendRepository
 	backends []entity.Backend
 	index    uint32
 	mu       sync.RWMutex
 }
 
-func NewClassicRoundRobinAlgorithm(repo port.BackendRepository) *ClassicRoundRobinAlgorithm {
+func NewClassicRoundRobinAlgorithm() *ClassicRoundRobinAlgorithm {
 	return &ClassicRoundRobinAlgorithm{
-		repo:  repo,
 		index: 0,
 	}
 }

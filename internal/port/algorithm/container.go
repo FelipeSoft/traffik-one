@@ -3,9 +3,7 @@ package algorithm
 import (
 	"log"
 
-	"github.com/FelipeSoft/traffik-one/internal/adapter/repository"
 	"github.com/FelipeSoft/traffik-one/internal/core/port"
-	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
 )
 
 type Container struct {
@@ -15,12 +13,9 @@ type Container struct {
 }
 
 func NewContainer() *Container {
-	boltDB := bolt.DB()
-	backendRepository := repository.NewBoltBackendRepository(boltDB)
-
-	classicRoundRobinAlgorithm := NewClassicRoundRobinAlgorithm(backendRepository)
-	weightedRoundRobinAlgorithm := NewWeightedRoundRobinAlgorithm(backendRepository)
-	leastConnectionAlgorithm := NewLeastConnectionAlgorithm(backendRepository)
+	classicRoundRobinAlgorithm := NewClassicRoundRobinAlgorithm()
+	weightedRoundRobinAlgorithm := NewWeightedRoundRobinAlgorithm()
+	leastConnectionAlgorithm := NewLeastConnectionAlgorithm()
 
 	log.Println("[Algorithms Container] Dependencies loaded successfully")
 

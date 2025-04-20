@@ -7,19 +7,16 @@ import (
 	"sync/atomic"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
-	"github.com/FelipeSoft/traffik-one/internal/core/port"
 )
 
 type LeastConnectionAlgorithm struct {
-	repo     port.BackendRepository
 	backends []entity.Backend
 	index    uint32
 	mu       sync.RWMutex
 }
 
-func NewLeastConnectionAlgorithm(repo port.BackendRepository) *LeastConnectionAlgorithm {
+func NewLeastConnectionAlgorithm() *LeastConnectionAlgorithm {
 	return &LeastConnectionAlgorithm{
-		repo:  repo,
 		index: 0,
 	}
 }
