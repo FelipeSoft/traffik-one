@@ -13,6 +13,7 @@ import (
 )
 
 type Container struct {
+	ConfigEvent         *entity.ConfigEvent
 	TestUseCase         *TestUseCase
 	BackendUseCase      *BackendUseCase
 	RoutingRulesUseCase *RoutingRulesUseCase
@@ -47,6 +48,7 @@ func NewContainer(ctx context.Context) *Container {
 	log.Println("[UseCase Container] Dependencies loaded successfully")
 
 	return &Container{
+		ConfigEvent:         configEvent,
 		TestUseCase:         testUseCase,
 		BackendUseCase:      backendUseCase,
 		RoutingRulesUseCase: routingRulesUseCase,
