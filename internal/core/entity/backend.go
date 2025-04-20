@@ -9,15 +9,15 @@ import (
 type Backend struct {
 	ID       string  `json:"id"`
 	IPv4     string  `json:"ipv4"`
-	Hostname *string `json:"hostname"`
+	Hostname string `json:"hostname"`
 	Port     int     `json:"port"`
 	Protocol string  `json:"protocol"`
-	Weight   *int    `json:"weight"`
+	Weight   int    `json:"weight"`
 	State    bool    `json:"state"`
 	PoolID   string  `json:"poolId"`
 }
 
-func NewBackend(ipv4 string, hostname *string, port int, protocol string, weight *int, poolId string) *Backend {
+func NewBackend(ipv4 string, hostname string, port int, protocol string, weight int, poolId string) *Backend {
 	id := idgen.GenerateID()
 	backend := &Backend{
 		ID:       id,

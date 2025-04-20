@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/dto"
@@ -23,26 +22,26 @@ func NewBackendHandler(uc *usecase.BackendUseCase) *BackendHandler {
 
 func (h *BackendHandler) AddBackend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
 		ctx := r.Context()
 
-		body, err := io.ReadAll(r.Body)
-
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
-			return
-		}
-		defer r.Body.Close()
-
 		var dto dto.AddBackendInput
-		err = json.Unmarshal(body, &dto)
-		if err != nil {
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+
+		if err := decoder.Decode(&dto); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
 		}
 
-		err = h.uc.AddBackend(ctx, dto)
+		if dto.Hostname == "" || dto.IPv4 == "" || dto.PoolID == "" || dto.Port == 0 || dto.Weight == 0 || dto.Protocol == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Missing required fields"))
+			return
+		}
+
+		err := h.uc.AddBackend(ctx, dto)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
@@ -54,6 +53,7 @@ func (h *BackendHandler) AddBackend() http.HandlerFunc {
 
 func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
 		ctx := r.Context()
 
 		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
@@ -70,17 +70,11 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 			return
 		}
 
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
-			return
-		}
-		defer r.Body.Close()
-
 		var dto dto.UpdateBackendInput
-		err = json.Unmarshal(body, &dto)
-		if err != nil {
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+
+		if err := decoder.Decode(&dto); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write(fmt.Appendf(nil, "Invalid request body: %v", err))
 			return
@@ -88,7 +82,7 @@ func (h *BackendHandler) UpdateBackend() http.HandlerFunc {
 
 		dto.ID = backendId
 
-		err = h.uc.UpdateBackend(ctx, dto)
+		err := h.uc.UpdateBackend(ctx, dto)
 		if err != nil {
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			w.Write([]byte(err.Error()))
@@ -232,6 +226,46 @@ func (h *BackendHandler) GetBackendByID() http.HandlerFunc {
 
 		backends, err := h.uc.GetBackendByID(ctx, dto.GetBackendByIDInput{
 			ID: backendId,
+		})
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		resp, err := json.Marshal(backends)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
+}
+
+func (h *BackendHandler) GetBackendByPoolID() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		params, ok := ctx.Value(port.ParamsKey).(map[string]string)
+		if !ok {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Invalid context params"))
+			return
+		}
+
+		poolId := params["poolId"]
+		if poolId == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("The URL param 'poolId' missing"))
+			return
+		}
+
+		backends, err := h.uc.GetBackendsByPoolID(ctx, dto.GetBackendsByPoolIDInput{
+			PoolID: poolId,
 		})
 
 		if err != nil {

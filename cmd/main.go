@@ -29,9 +29,10 @@ func main() {
 	}
 	defer bolt.Close()
 
-	appInstance := app.NewApp()
-	http.StartHttpServer(ctx, appInstance)
+	appInstance := app.NewApp(ctx)
+
+	go http.StartHttpServer(ctx, appInstance)
+	go http.StartHttpLoadBalancer(ctx)
 
 	<-ctx.Done()
-	log.Print("Load balancer exited")
 }
