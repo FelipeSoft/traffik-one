@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
+	"github.com/FelipeSoft/traffik-one/internal/port/algorithm"
 )
 
 func StartHttpLoadBalancer(ctx context.Context, configEvent *entity.ConfigEvent) {
@@ -19,6 +20,14 @@ func StartHttpLoadBalancer(ctx context.Context, configEvent *entity.ConfigEvent)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Current ConfigEvent: %v", configEvent)
+		// put a factory for the algorithm here
+		algorithmFactory := algorithm.NewAlgorithmFactory(configEvent)
+		algorithmStrategy, err := algorithmFactory.Create()
+		if err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte(err.Error()))
+		}
+		algorithmStrategy.ReverseProxy(w, r)
 	})
 
 	server := &http.Server{

@@ -25,7 +25,7 @@ func NewLeastConnectionAlgorithm(configEvent *entity.ConfigEvent) *LeastConnecti
 func (a *LeastConnectionAlgorithm) ReverseProxy(w http.ResponseWriter, r *http.Request) {
 	nextBackend := a.Next()
 	// header := w.Header().Clone()
-	log.Printf("[Classic Round Robin] Next Backend ID: %v", nextBackend)
+	log.Printf("[Least Connection] Next Backend ID: %v", nextBackend)
 }
 
 func (a *LeastConnectionAlgorithm) Next() *entity.Backend {
