@@ -29,7 +29,7 @@ func Init(path string, database string) error {
 			return
 		}
 
-		bucketNames := []string{"backends", "pools", "routing_rules"}
+		bucketNames := []string{"backends", "pools", "routing_rules", "current_algorithm", "backend_by_pool", "routing_rules_by_pool"}
 		if err := startBuckets(conn, bucketNames); err != nil {
 			conn.Close()
 			initError = err
@@ -37,6 +37,19 @@ func Init(path string, database string) error {
 		}
 
 		dbInstance = conn
+		err = dbInstance.Update(func(tx *bolt.Tx) error {
+			currentAlgorithm := tx.Bucket([]byte("current_algorithm"))
+			algorithm := currentAlgorithm.Get([]byte("root"))
+			if algorithm == nil {
+				err := currentAlgorithm.Put([]byte("root"), []byte("wrr"))
+				if err != nil {
+					return err
+				}
+			}
+
+			return err
+		})
+		initError = err
 	})
 
 	return initError
