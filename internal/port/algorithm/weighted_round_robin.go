@@ -9,14 +9,15 @@ import (
 )
 
 type WeightedRoundRobinAlgorithm struct {
-	backends []entity.Backend
-	index    uint32
-	mu       sync.RWMutex
+	configEvent *entity.ConfigEvent
+	index       uint32
+	mu          sync.RWMutex
 }
 
-func NewWeightedRoundRobinAlgorithm() *WeightedRoundRobinAlgorithm {
+func NewWeightedRoundRobinAlgorithm(configEvent *entity.ConfigEvent) *WeightedRoundRobinAlgorithm {
 	return &WeightedRoundRobinAlgorithm{
-		index: 0,
+		configEvent: configEvent,
+		index:       0,
 	}
 }
 
@@ -30,10 +31,10 @@ func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if len(a.backends) == 0 {
+	if len(a.configEvent.Backend) == 0 {
 		return nil
 	}
 
-	backend := a.backends[0]
+	backend := a.configEvent.Backend[0]
 	return &backend
 }

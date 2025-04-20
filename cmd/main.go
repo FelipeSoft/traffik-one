@@ -7,6 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
+	"github.com/FelipeSoft/traffik-one/internal/bootstrap"
 	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
 	"github.com/FelipeSoft/traffik-one/internal/port/http"
 	"github.com/FelipeSoft/traffik-one/internal/port/idgen"
@@ -29,7 +30,8 @@ func main() {
 	}
 	defer bolt.Close()
 
-	appInstance := app.NewApp(ctx)
+	configEvent := bootstrap.LoadInitialConfig()
+	appInstance := app.NewApp(ctx, configEvent)
 
 	go http.StartHttpServer(ctx, appInstance)
 	go http.StartHttpLoadBalancer(ctx, appInstance.UseCases.ConfigEvent)

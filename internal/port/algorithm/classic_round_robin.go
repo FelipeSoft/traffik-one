@@ -10,14 +10,15 @@ import (
 )
 
 type ClassicRoundRobinAlgorithm struct {
-	backends []entity.Backend
-	index    uint32
-	mu       sync.RWMutex
+	configEvent *entity.ConfigEvent
+	index       uint32
+	mu          sync.RWMutex
 }
 
-func NewClassicRoundRobinAlgorithm() *ClassicRoundRobinAlgorithm {
+func NewClassicRoundRobinAlgorithm(configEvent *entity.ConfigEvent) *ClassicRoundRobinAlgorithm {
 	return &ClassicRoundRobinAlgorithm{
-		index: 0,
+		configEvent: configEvent,
+		index:       0,
 	}
 }
 
@@ -31,11 +32,11 @@ func (a *ClassicRoundRobinAlgorithm) Next() *entity.Backend {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if len(a.backends) == 0 {
+	if len(a.configEvent.Backend) == 0 {
 		return nil
 	}
 
 	idx := atomic.AddUint32(&a.index, 1) - 1
-	backend := a.backends[idx%uint32(len(a.backends))]
+	backend := a.configEvent.Backend[idx%uint32(len(a.configEvent.Backend))]
 	return &backend
 }

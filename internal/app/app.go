@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 	"github.com/FelipeSoft/traffik-one/internal/core/usecase"
 	"github.com/FelipeSoft/traffik-one/internal/port/algorithm"
 	"github.com/FelipeSoft/traffik-one/internal/port/http/handler"
@@ -16,11 +17,11 @@ type App struct {
 	Algorithms  *algorithm.Container
 }
 
-func NewApp(ctx context.Context) *App {
-	usecases := usecase.NewContainer(ctx)
+func NewApp(ctx context.Context, configEvent *entity.ConfigEvent) *App {
+	usecases := usecase.NewContainer(ctx, configEvent)
 	handlers := handler.NewContainer(usecases)
 	middlewares := middleware.NewContainer()
-	algorithms := algorithm.NewContainer()
+	algorithms := algorithm.NewContainer(configEvent)
 
 	return &App{
 		Handlers:    handlers,
