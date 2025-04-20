@@ -35,7 +35,7 @@ func LoadInitialConfig() *entity.ConfigEvent {
 	algorithm, err := algorithmsRepository.Get(ctx)
 	if err != nil && algorithm == "" {
 		log.Println("[Bootstrap] No algorithm found, using default RoundRobin")
-		defaultAlgorithm := "crr"
+		defaultAlgorithm := "wrr"
 		if saveErr := algorithmsRepository.Set(ctx, defaultAlgorithm); saveErr != nil {
 			log.Fatalf("failed to save default algorithm: %v", saveErr)
 		}
@@ -47,4 +47,8 @@ func LoadInitialConfig() *entity.ConfigEvent {
 		RoutingRules: routingRules,
 		Algorithm:    &algorithm,
 	}
+}
+
+func Load() *entity.ConfigEvent {
+	return nil
 }

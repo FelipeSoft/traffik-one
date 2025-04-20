@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 )
 
-func StartHttpLoadBalancer(ctx context.Context) {
+func StartHttpLoadBalancer(ctx context.Context, configEvent *entity.ConfigEvent) {
 	mux := http.NewServeMux()
 
 	httpLoadBalancerHost := os.Getenv("HTTP_LOAD_BALANCER_HOST")
@@ -16,7 +18,7 @@ func StartHttpLoadBalancer(ctx context.Context) {
 	httpLoadBalancerBindAddress := fmt.Sprintf("%s:%s", httpLoadBalancerHost, httpLoadBalancerPort)
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		
+		log.Printf("Current ConfigEvent: %v", configEvent)
 	})
 
 	server := &http.Server{

@@ -32,7 +32,7 @@ func main() {
 	appInstance := app.NewApp(ctx)
 
 	go http.StartHttpServer(ctx, appInstance)
-	go http.StartHttpLoadBalancer(ctx)
+	go http.StartHttpLoadBalancer(ctx, appInstance.UseCases.ConfigEvent)
 
 	<-ctx.Done()
 }
