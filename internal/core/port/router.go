@@ -3,6 +3,7 @@ package port
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -26,6 +27,7 @@ func NewRouter() *Router {
 }
 
 func (r *Router) Handle(method, pattern string, handler http.HandlerFunc) {
+	log.Printf("[Router] Mapped {%s, %s}", pattern, method)
 	r.routes = append(r.routes, Route{
 		Method:  method,
 		Pattern: pattern,

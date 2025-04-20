@@ -1,4 +1,4 @@
-package entity
+package port
 
 type TokenManager interface {
 	Sign(payload any) (string, error)

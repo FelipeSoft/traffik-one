@@ -4,6 +4,7 @@ type AddRoutingRulesInput struct {
 	Source   string `json:"source"`
 	Target   string `json:"target"`
 	Protocol string `json:"protocol"`
+	PoolID   string `json:"poolId"`
 }
 
 type UpdateRoutingRulesInput struct {
@@ -11,6 +12,7 @@ type UpdateRoutingRulesInput struct {
 	Source   string `json:"source"`
 	Target   string `json:"target"`
 	Protocol string `json:"protocol"`
+	PoolID   string `json:"poolId"`
 }
 
 type DeleteRoutingRulesInput struct {
@@ -19,4 +21,8 @@ type DeleteRoutingRulesInput struct {
 
 type GetRoutingRulesByIDInput struct {
 	ID string `json:"id"`
+}
+
+type GetRoutingRulesByPoolIDInput struct {
+	PoolID string `json:"poolId"`
 }
