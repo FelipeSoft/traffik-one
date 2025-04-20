@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/FelipeSoft/traffik-one/internal/adapter/repository"
-	"github.com/FelipeSoft/traffik-one/internal/bootstrap"
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 	"github.com/FelipeSoft/traffik-one/internal/core/port"
 	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
@@ -20,9 +19,8 @@ type Container struct {
 	AlgorithmsUseCase   *AlgorithmsUseCase
 }
 
-func NewContainer(ctx context.Context) *Container {
+func NewContainer(ctx context.Context, configEvent *entity.ConfigEvent) *Container {
 	boltDb := bolt.DB()
-	configEvent := bootstrap.LoadInitialConfig()
 
 	backendDispatcher := dispatcher.NewBackendDispatcher(configEvent, make(chan []entity.Backend, 1))
 	routingRulesDispatcher := dispatcher.NewRoutingRulesDispatcher(configEvent, make(chan []entity.RoutingRules, 1))

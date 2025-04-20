@@ -6,20 +6,18 @@ import (
 	"sync"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
-	"github.com/FelipeSoft/traffik-one/internal/core/port"
 )
 
 type WeightedRoundRobinAlgorithm struct {
-	repo     port.BackendRepository
-	backends []entity.Backend
-	index    uint32
-	mu       sync.RWMutex
+	configEvent *entity.ConfigEvent
+	index       uint32
+	mu          sync.RWMutex
 }
 
-func NewWeightedRoundRobinAlgorithm(repo port.BackendRepository) *WeightedRoundRobinAlgorithm {
+func NewWeightedRoundRobinAlgorithm(configEvent *entity.ConfigEvent) *WeightedRoundRobinAlgorithm {
 	return &WeightedRoundRobinAlgorithm{
-		repo:  repo,
-		index: 0,
+		configEvent: configEvent,
+		index:       0,
 	}
 }
 
@@ -33,10 +31,10 @@ func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if len(a.backends) == 0 {
+	if len(a.configEvent.Backend) == 0 {
 		return nil
 	}
 
-	backend := a.backends[0]
+	backend := a.configEvent.Backend[0]
 	return &backend
 }
