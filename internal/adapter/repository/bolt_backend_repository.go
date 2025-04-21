@@ -89,7 +89,7 @@ func (r *BoltBackendRepository) Delete(ctx context.Context, backendId string, po
 		if bucket == nil {
 			return fmt.Errorf("bolt bucket named as '%s' not found", string(backendBoltBucket))
 		}
-		
+
 		err := bucket.Delete([]byte(backendId))
 		if err != nil {
 			return err
@@ -142,7 +142,7 @@ func (r *BoltBackendRepository) GetByID(ctx context.Context, backendId string) (
 	return &result, err
 }
 
-func (r *BoltBackendRepository) FindBackendsByPoolID(ctx context.Context, poolId string) ([]entity.Backend, error) {
+func (r *BoltBackendRepository) FindBackendsByPoolID(ctx context.Context, poolId string, availables bool) ([]entity.Backend, error) {
 	var results []entity.Backend
 
 	err := r.db.View(func(tx *bolt.Tx) error {
@@ -161,12 +161,14 @@ func (r *BoltBackendRepository) FindBackendsByPoolID(ctx context.Context, poolId
 		if indexValue == nil {
 			return fmt.Errorf("no backends found for poolId %s", poolId)
 		}
-		err := indexValue.ForEach(func (k []byte, v []byte) error {
+		err := indexValue.ForEach(func(k []byte, v []byte) error {
 			var backend entity.Backend
 			if err := json.Unmarshal(v, &backend); err != nil {
 				return err
 			}
-			results = append(results, backend)
+			if !availables || backend.State {
+				results = append(results, backend)
+			}
 			return nil
 		})
 

@@ -18,15 +18,13 @@ func StartHttpLoadBalancer(ctx context.Context, configEvent *entity.ConfigEvent)
 	httpLoadBalancerPort := os.Getenv("HTTP_LOAD_BALANCER_PORT")
 	httpLoadBalancerBindAddress := fmt.Sprintf("%s:%s", httpLoadBalancerHost, httpLoadBalancerPort)
 
+	algorithmFactory := algorithm.NewAlgorithmFactory(configEvent)
+	algorithmStrategy, err := algorithmFactory.Create()
+	if err != nil {
+		log.Fatalf("Algorithm Factory error: %v", err)
+	}
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Current ConfigEvent: %v", configEvent)
-		// put a factory for the algorithm here
-		algorithmFactory := algorithm.NewAlgorithmFactory(configEvent)
-		algorithmStrategy, err := algorithmFactory.Create()
-		if err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte(err.Error()))
-		}
 		algorithmStrategy.ReverseProxy(w, r)
 	})
 

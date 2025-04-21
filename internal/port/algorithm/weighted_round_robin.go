@@ -1,9 +1,13 @@
 package algorithm
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 )
@@ -23,18 +27,61 @@ func NewWeightedRoundRobinAlgorithm(configEvent *entity.ConfigEvent) *WeightedRo
 
 func (a *WeightedRoundRobinAlgorithm) ReverseProxy(w http.ResponseWriter, r *http.Request) {
 	nextBackend := a.Next()
-	// header := w.Header().Clone()
-	log.Printf("[Weighted Round Robin] Next Backend ID: %v", nextBackend)
+	if nextBackend == nil {
+		http.Error(w, "no available backends", http.StatusServiceUnavailable)
+		return
+	}
+
+	var backendURL string
+	if nextBackend.Hostname != "none" {
+		backendURL = fmt.Sprintf("%s://%s%s", nextBackend.Protocol, nextBackend.Hostname, r.RequestURI)
+	} else {
+		backendURL = fmt.Sprintf("%s://%s:%d%s", nextBackend.Protocol, nextBackend.IPv4, nextBackend.Port, r.RequestURI)
+	}
+
+	req, err := http.NewRequest(r.Method, backendURL, r.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("backend %s error: %v", nextBackend.ID, err), http.StatusInternalServerError)
+		return
+	}
+
+	for key, values := range r.Header {
+		req.Header.Set(key, strings.Join(values, ", "))
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error forwarding request to backend %s: %v", nextBackend.ID, err), http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+
+	for key, values := range resp.Header {
+		w.Header().Set(key, strings.Join(values, ", "))
+	}
+	w.WriteHeader(resp.StatusCode)
+
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		log.Printf("error copying response body: %v", err)
+	}
 }
 
 func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-
 	if len(a.configEvent.Backend) == 0 {
 		return nil
 	}
 
-	backend := a.configEvent.Backend[0]
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	idx := atomic.AddUint32(&a.index, 1)
+
+	if idx >= uint32(len(a.configEvent.Backend)) {
+		atomic.StoreUint32(&a.index, 0)
+		idx = 0
+	}
+
+	backend := a.configEvent.Backend[idx%uint32(len(a.configEvent.Backend))]
 	return &backend
 }

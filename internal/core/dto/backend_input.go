@@ -1,12 +1,12 @@
 package dto
 
 type AddBackendInput struct {
-	IPv4     string  `json:"ipv4"`
+	IPv4     string `json:"ipv4"`
 	Hostname string `json:"hostname"`
-	Port     int     `json:"port"`
-	Protocol string  `json:"protocol"`
+	Port     int    `json:"port"`
+	Protocol string `json:"protocol"`
 	Weight   int    `json:"weight"`
-	PoolID   string  `json:"poolId"`
+	PoolID   string `json:"poolId"`
 }
 
 type RemoveBackendFromPoolInput struct {
@@ -15,13 +15,13 @@ type RemoveBackendFromPoolInput struct {
 }
 
 type UpdateBackendInput struct {
-	ID       string  `json:"id"`
-	IPv4     string  `json:"ipv4"`
+	ID       string `json:"id"`
+	IPv4     string `json:"ipv4"`
 	Hostname string `json:"hostname"`
-	Port     int     `json:"port"`
-	Protocol string  `json:"protocol"`
+	Port     int    `json:"port"`
+	Protocol string `json:"protocol"`
 	Weight   int    `json:"weight"`
-	PoolID   string  `json:"poolId"`
+	PoolID   string `json:"poolId"`
 }
 
 type ActivateBackendInput struct {
