@@ -4,24 +4,24 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
-	"sync/atomic"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
 )
 
 type WeightedRoundRobinAlgorithm struct {
 	configEvent *entity.ConfigEvent
-	index       uint32
-	mu          sync.RWMutex
+	randGen     *rand.Rand
+	randLock    sync.Mutex
 }
 
 func NewWeightedRoundRobinAlgorithm(configEvent *entity.ConfigEvent) *WeightedRoundRobinAlgorithm {
 	return &WeightedRoundRobinAlgorithm{
 		configEvent: configEvent,
-		index:       0,
+		randGen:     rand.New(rand.NewSource(rand.Int63())),
 	}
 }
 
@@ -68,20 +68,34 @@ func (a *WeightedRoundRobinAlgorithm) ReverseProxy(w http.ResponseWriter, r *htt
 }
 
 func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
-	if len(a.configEvent.Backend) == 0 {
+	var total int
+	var activeBackends []*entity.Backend
+
+	// Primeira passada: calcular peso total e coletar backends ativos
+	for i := range a.configEvent.Backend {
+		if a.configEvent.Backend[i].State {
+			total += a.configEvent.Backend[i].Weight
+			activeBackends = append(activeBackends, &a.configEvent.Backend[i])
+		}
+	}
+
+	if total == 0 {
 		return nil
 	}
 
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	// Gerar número aleatório seguro para concorrência
+	a.randLock.Lock()
+	randomValue := a.randGen.Intn(total)
+	a.randLock.Unlock()
 
-	idx := atomic.AddUint32(&a.index, 1)
-
-	if idx >= uint32(len(a.configEvent.Backend)) {
-		atomic.StoreUint32(&a.index, 0)
-		idx = 0
+	// Segunda passada: encontrar o backend correspondente
+	var cumulative int
+	for _, backend := range activeBackends {
+		cumulative += backend.Weight
+		if randomValue < cumulative {
+			return backend
+		}
 	}
 
-	backend := a.configEvent.Backend[idx%uint32(len(a.configEvent.Backend))]
-	return &backend
+	return nil // Nunca deve chegar aqui se total > 0
 }

@@ -33,22 +33,10 @@ func (a *ClassicRoundRobinAlgorithm) ReverseProxy(w http.ResponseWriter, r *http
 	}
 
 	var backendURL string
-
-	backendSource := r.RequestURI
 	if nextBackend.Hostname != "none" {
-		backendURL = fmt.Sprintf("%s://%s%s", nextBackend.Protocol, nextBackend.Hostname, backendSource)
+		backendURL = fmt.Sprintf("%s://%s%s", nextBackend.Protocol, nextBackend.Hostname, r.RequestURI)
 	} else {
-		backendURL = fmt.Sprintf("%s://%s:%d%s", nextBackend.Protocol, nextBackend.IPv4, nextBackend.Port, backendSource)
-	}
-
-	routingRules := a.configEvent.RoutingRules
-	if len(routingRules) > 0 {
-		for _, rule := range routingRules {
-			if rule.Source != backendSource {
-				http.Error(w, fmt.Sprintf("error forwarding request to backend %s: source '%s' not found", nextBackend.ID, backendSource), http.StatusNotFound)
-				return
-			}
-		}
+		backendURL = fmt.Sprintf("%s://%s:%d%s", nextBackend.Protocol, nextBackend.IPv4, nextBackend.Port, r.RequestURI)
 	}
 
 	req, err := http.NewRequest(r.Method, backendURL, r.Body)
