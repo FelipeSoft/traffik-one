@@ -20,7 +20,7 @@ func LoadInitialConfig() *entity.ConfigEvent {
 	routingRulesRepository := repository.NewBoltRoutingRulesRepository(db)
 	algorithmsRepository := repository.NewBoltAlgorithmsRepository(db)
 
-	backends, err := backendRepository.FindBackendsByPoolID(ctx, poolId, true)
+	backends, err := backendRepository.FindBackendsByPoolID(ctx, poolId, false)
 	if err != nil || len(backends) == 0 {
 		log.Println("[Bootstrap] No backends found, using empty list")
 		backends = []entity.Backend{}

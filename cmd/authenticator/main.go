@@ -12,7 +12,7 @@ func main() {
 		"UserId": "1",
 	})
 	if err != nil {
-		log.Fatalf("Erorr during the token signing: %v", err)
+		log.Fatalf("Error during the token signing: %v", err)
 	}
 	log.Print(token)
 }

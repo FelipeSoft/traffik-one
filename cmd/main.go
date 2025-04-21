@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
 	"github.com/FelipeSoft/traffik-one/internal/bootstrap"
@@ -33,8 +34,11 @@ func main() {
 	configEvent := bootstrap.LoadInitialConfig()
 	appInstance := app.NewApp(ctx, configEvent)
 
+	log.Printf("Config Event: %v", configEvent)
+
 	go http.StartHttpServer(ctx, appInstance)
-	go http.StartHttpLoadBalancer(ctx, appInstance.UseCases.ConfigEvent)
+	go http.StartHttpLoadBalancer(ctx, configEvent)
+	go http.StartHttpHealthChecker(ctx, configEvent, 5 * time.Second, 5)
 
 	<-ctx.Done()
 }

@@ -32,6 +32,8 @@ func (a *WeightedRoundRobinAlgorithm) ReverseProxy(w http.ResponseWriter, r *htt
 		return
 	}
 
+	
+
 	var backendURL string
 	if nextBackend.Hostname != "none" {
 		backendURL = fmt.Sprintf("%s://%s%s", nextBackend.Protocol, nextBackend.Hostname, r.RequestURI)

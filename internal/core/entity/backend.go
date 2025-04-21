@@ -53,7 +53,6 @@ func NewBackend(ipv4 string, hostname string, port int, protocol string, weight 
 		Weight:   validWeight.weight,
 		PoolID:   poolId,
 	}
-	backend.Activate()
 	return backend, nil
 }
 
