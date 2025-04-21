@@ -21,6 +21,7 @@ func LoadInitialConfig() *entity.ConfigEvent {
 	algorithmsRepository := repository.NewBoltAlgorithmsRepository(db)
 
 	backends, err := backendRepository.FindBackendsByPoolID(ctx, poolId, false)
+	log.Printf("Backends: %v", backends)
 	if err != nil || len(backends) == 0 {
 		log.Println("[Bootstrap] No backends found, using empty list")
 		backends = []entity.Backend{}

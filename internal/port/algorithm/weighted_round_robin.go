@@ -32,7 +32,9 @@ func (a *WeightedRoundRobinAlgorithm) ReverseProxy(w http.ResponseWriter, r *htt
 		return
 	}
 
-	
+	if !nextBackend.State {
+		nextBackend = a.Next()
+	}
 
 	var backendURL string
 	if nextBackend.Hostname != "none" {
