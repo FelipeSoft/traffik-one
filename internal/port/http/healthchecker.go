@@ -12,7 +12,6 @@ import (
 )
 
 func StartHttpHealthChecker(ctx context.Context, configEvent *entity.ConfigEvent, interval time.Duration, workers int) {
-    log.Print(configEvent)
 	var wg sync.WaitGroup
 	workChan := make(chan *entity.Backend, workers)
 

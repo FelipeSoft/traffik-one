@@ -34,8 +34,6 @@ func main() {
 	configEvent := bootstrap.LoadInitialConfig()
 	appInstance := app.NewApp(ctx, configEvent)
 
-	log.Printf("Config Event: %v", configEvent)
-
 	go http.StartHttpServer(ctx, appInstance)
 	go http.StartHttpLoadBalancer(ctx, configEvent)
 	go http.StartHttpHealthChecker(ctx, configEvent, 5 * time.Second, 5)
