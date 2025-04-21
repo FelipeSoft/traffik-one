@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/dto"
@@ -24,10 +23,6 @@ func NewRoutingRulesUseCase(repo port.RoutingRulesRepository, dispatcher *dispat
 }
 
 func (uc *RoutingRulesUseCase) Add(ctx context.Context, input dto.AddRoutingRulesInput) error {
-	if input.PoolID != "1" {
-		return fmt.Errorf("only the default poolId 1 should be used")
-	}
-	
 	routingRules := entity.NewRoutingRules(
 		input.Source,
 		input.Target,
@@ -68,9 +63,6 @@ func (uc *RoutingRulesUseCase) Update(ctx context.Context, input dto.UpdateRouti
 	}
 
 	if input.PoolID != "" {
-		if input.PoolID != "1" {
-			return fmt.Errorf("only the default poolId 1 should be used")
-		}
 		routingRules.PoolID = input.PoolID
 	}
 

@@ -1,5 +1,7 @@
 package entity
 
+import "slices"
+
 import "fmt"
 
 type Protocol struct {
@@ -9,13 +11,7 @@ type Protocol struct {
 var availableProtocols = []string{"http", "https"}
 
 func NewProtocol(protocol string) (*Protocol, error) {
-	valid := false
-	for _, p := range availableProtocols {
-		if protocol == p {
-			valid = true
-			break
-		}
-	}
+	valid := slices.Contains(availableProtocols, protocol)
 	if valid {
 		return &Protocol{protocol: protocol}, nil
 	}

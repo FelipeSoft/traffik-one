@@ -2,7 +2,6 @@ package entity
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/FelipeSoft/traffik-one/internal/port/idgen"
 )
@@ -98,7 +97,6 @@ func (b *Backend) Update(ipv4 string, hostname string, port int, protocol string
 	if poolId == "0" {
 		backend.PoolID = b.PoolID
 	}
-	log.Print(backend)
 	return backend, nil
 }
 
