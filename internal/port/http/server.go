@@ -8,12 +8,13 @@ import (
 	"os"
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
+	"github.com/FelipeSoft/traffik-one/internal/core/port/websocket"
 )
 
-func StartHttpServer(ctx context.Context, app *app.App) {
+func StartHttpServer(ctx context.Context, app *app.App, websocket *websocket.WebsocketServer) {
 	httpHost := os.Getenv("HTTP_HOST")
 	httpPort := os.Getenv("HTTP_PORT")
-	httpRouter := RegisterRoutes(app)
+	httpRouter := RegisterRoutes(app, websocket)
 	httpBindAddress := fmt.Sprintf("%s:%s", httpHost, httpPort)
 
 	server := &http.Server{

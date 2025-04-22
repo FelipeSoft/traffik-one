@@ -44,7 +44,7 @@ func (uc *BackendUseCase) AddBackend(ctx context.Context, input dto.AddBackendIn
 		return err
 	}
 
-	backends, err := uc.repo.FindBackendsByPoolID(ctx, input.PoolID, true)
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, input.PoolID, false)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (uc *BackendUseCase) UpdateBackend(ctx context.Context, input dto.UpdateBac
 		return err
 	}
 
-	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, true)
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, false)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (uc *BackendUseCase) ActivateBackend(ctx context.Context, input dto.Activat
 		return err
 	}
 
-	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, true)
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, false)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (uc *BackendUseCase) InactivateBackend(ctx context.Context, input dto.Inact
 	if err = uc.repo.Save(ctx, backend); err != nil {
 		return err
 	}
-	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, true)
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, false)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (uc *BackendUseCase) DeleteBackend(ctx context.Context, input dto.DeleteBac
 	if err != nil {
 		return err
 	}
-	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, true)
+	backends, err := uc.repo.FindBackendsByPoolID(ctx, backend.PoolID, false)
 	if err != nil {
 		return err
 	}

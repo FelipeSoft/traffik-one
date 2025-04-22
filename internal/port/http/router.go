@@ -1,15 +1,21 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/FelipeSoft/traffik-one/internal/app"
 	"github.com/FelipeSoft/traffik-one/internal/core/port"
+	"github.com/FelipeSoft/traffik-one/internal/core/port/websocket"
 )
 
-func RegisterRoutes(app *app.App) *port.Router {
+func RegisterRoutes(app *app.App, ws *websocket.WebsocketServer) *port.Router {
 	router := port.NewRouter()
 
 	// withBearerToken := app.Middlewares.AuthenticationMiddleware.HandleBearerToken
 
+	router.Handle("GET", "/ws", func(w http.ResponseWriter, r *http.Request) {
+		websocket.HandleWebsocket(ws, w, r)
+	})
 	router.Handle("POST", "/test", app.Handlers.TestHandler.Test())
 
 	router.Handle("POST", "/backends/add", app.Handlers.BackendHandler.AddBackend())

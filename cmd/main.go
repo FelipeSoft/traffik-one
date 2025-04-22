@@ -9,8 +9,9 @@ import (
 
 	"github.com/FelipeSoft/traffik-one/internal/app"
 	"github.com/FelipeSoft/traffik-one/internal/bootstrap"
+	"github.com/FelipeSoft/traffik-one/internal/core/port/websocket"
 	"github.com/FelipeSoft/traffik-one/internal/port/bolt"
-	"github.com/FelipeSoft/traffik-one/internal/port/http"
+	httputil "github.com/FelipeSoft/traffik-one/internal/port/http"
 	"github.com/FelipeSoft/traffik-one/internal/port/idgen"
 	"github.com/joho/godotenv"
 )
@@ -32,11 +33,12 @@ func main() {
 	defer bolt.Close()
 
 	configEvent := bootstrap.LoadInitialConfig()
+	websocketServer := websocket.NewServer(ctx)
 	appInstance := app.NewApp(ctx, configEvent)
 
-	go http.StartHttpServer(ctx, appInstance)
-	go http.StartHttpLoadBalancer(ctx, configEvent)
-	go http.StartHttpHealthChecker(ctx, configEvent, 5 * time.Second, 5)
+	go httputil.StartHttpServer(ctx, appInstance, websocketServer)
+	go httputil.StartHttpLoadBalancer(ctx, configEvent)
+	go httputil.StartHttpHealthChecker(ctx, websocketServer, configEvent, 5*time.Second, 5)
 
 	<-ctx.Done()
 }

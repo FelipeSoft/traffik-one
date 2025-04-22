@@ -45,6 +45,12 @@ func (d *BackendDispatcher) Start(ctx context.Context) {
 			}
 			d.mu.Lock()
 			d.configEvent.Backend = backend
+			// log.Printf("Backend: %v", backend)
+			// marshalBackend, err := json.Marshal(backend)
+			// if err != nil {
+			// 	log.Printf("Error to marshal updated backend list: %v", err)
+			// }
+			// d.ws.Broadcast(marshalBackend)
 			d.mu.Unlock()
 		}
 	}

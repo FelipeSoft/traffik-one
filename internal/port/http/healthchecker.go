@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,9 +10,10 @@ import (
 	"time"
 
 	"github.com/FelipeSoft/traffik-one/internal/core/entity"
+	"github.com/FelipeSoft/traffik-one/internal/core/port/websocket"
 )
 
-func StartHttpHealthChecker(ctx context.Context, configEvent *entity.ConfigEvent, interval time.Duration, workers int) {
+func StartHttpHealthChecker(ctx context.Context, ws *websocket.WebsocketServer, configEvent *entity.ConfigEvent, interval time.Duration, workers int) {
 	var wg sync.WaitGroup
 	workChan := make(chan *entity.Backend, workers)
 
@@ -20,6 +22,12 @@ func StartHttpHealthChecker(ctx context.Context, configEvent *entity.ConfigEvent
 		go func() {
 			defer wg.Done()
 			for backend := range workChan {
+				log.Printf("Backend: %v", backend)
+				marshalBackend, err := json.Marshal(backend)
+				if err != nil {
+					log.Printf("Error to marshal backend: %v", err)
+				}
+				ws.Broadcast(marshalBackend)
 				checkBackendHealth(backend)
 			}
 		}()
@@ -61,9 +69,9 @@ func checkBackendHealth(b *entity.Backend) {
 
 	resp, err := client.Get(healthURL)
 	if err != nil {
-		log.Printf("Health check failed for backend %s: %v", b.ID, err)
+		// log.Printf("Health check failed for backend %s: %v", b.ID, err)
 		if err := b.Inactivate(); err != nil {
-			log.Printf("Failed to deactivate backend %s: %v", b.ID, err)
+			// log.Printf("Failed to deactivate backend %s: %v", b.ID, err)
 		}
 		return
 	}
