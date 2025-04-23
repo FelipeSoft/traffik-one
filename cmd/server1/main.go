@@ -15,7 +15,12 @@ func main() {
 	mux := http.NewServeMux()
 	httpBindAddresses := []string{"127.0.0.1:8000"}
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Hello from server 1")
+		log.Printf("Health check from server 1")
+		w.WriteHeader(http.StatusOK)
+	})
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Load balancing from server 1")
 		w.WriteHeader(http.StatusOK)
 	})
 

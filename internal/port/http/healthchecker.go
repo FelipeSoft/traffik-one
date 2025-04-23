@@ -22,7 +22,6 @@ func StartHttpHealthChecker(ctx context.Context, ws *websocket.WebsocketServer, 
 		go func() {
 			defer wg.Done()
 			for backend := range workChan {
-				log.Printf("Backend: %v", backend)
 				marshalBackend, err := json.Marshal(backend)
 				if err != nil {
 					log.Printf("Error to marshal backend: %v", err)
@@ -69,9 +68,9 @@ func checkBackendHealth(b *entity.Backend) {
 
 	resp, err := client.Get(healthURL)
 	if err != nil {
-		// log.Printf("Health check failed for backend %s: %v", b.ID, err)
+		log.Printf("Health check failed for backend %s: %v", b.ID, err)
 		if err := b.Inactivate(); err != nil {
-			// log.Printf("Failed to deactivate backend %s: %v", b.ID, err)
+			log.Printf("Failed to deactivate backend %s: %v", b.ID, err)
 		}
 		return
 	}
@@ -82,6 +81,7 @@ func checkBackendHealth(b *entity.Backend) {
 
 	if resp.StatusCode == http.StatusOK {
 		if activeBackend {
+			log.Printf("Hello from %s://%s:%d", b.Protocol, b.IPv4, b.Port)
             return
         }
         b.Activate()

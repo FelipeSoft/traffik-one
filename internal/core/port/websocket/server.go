@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"context"
-	"log"
 	"sync"
 )
 
@@ -33,17 +32,14 @@ func (w *WebsocketServer) run() {
 	for {
 		select {
 		case client := <-w.register:
-			log.Print("connected")
 			w.mu.Lock()
 			w.clients[client] = true
 			w.mu.Unlock()
 		case client := <-w.unregister:
-			log.Print("disconnected")
 			w.mu.Lock()
 			delete(w.clients, client)
 			w.mu.Unlock()
 		case message := <-w.broadcast:
-			log.Print("broadcast")
 			w.mu.Lock()
 			for client := range w.clients {
 				select {

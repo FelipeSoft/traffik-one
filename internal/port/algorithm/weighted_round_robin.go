@@ -75,7 +75,6 @@ func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
 	var total int
 	var activeBackends []*entity.Backend
 
-	// Primeira passada: calcular peso total e coletar backends ativos
 	for i := range a.configEvent.Backend {
 		if a.configEvent.Backend[i].State {
 			total += a.configEvent.Backend[i].Weight
@@ -87,12 +86,10 @@ func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
 		return nil
 	}
 
-	// Gerar número aleatório seguro para concorrência
 	a.randLock.Lock()
 	randomValue := a.randGen.Intn(total)
 	a.randLock.Unlock()
 
-	// Segunda passada: encontrar o backend correspondente
 	var cumulative int
 	for _, backend := range activeBackends {
 		cumulative += backend.Weight
@@ -101,5 +98,5 @@ func (a *WeightedRoundRobinAlgorithm) Next() *entity.Backend {
 		}
 	}
 
-	return nil // Nunca deve chegar aqui se total > 0
+	return nil
 }
